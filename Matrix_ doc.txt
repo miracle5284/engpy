@@ -1,0 +1,552 @@
+'''The Matrix Class gives Python the ability to exclusively represent and manipulate Matrices
+
+    The Matrix Class is of two types: Matrix and Matrix_
+        Matrix is for representation of regular Matrices with numbers only while
+        Matrix_ is for representation of Matrices with ExprObjs. thus Matrix_ converts
+        all entries to ExprObj which makes it possible for Matrix_ to handle Matrix with Expressions\
+
+
+        As such, if the Matrix is a regular Matrix of numbers Use Matrix Class as it is faster
+        than the Matrix_ Class. However, even though Matrix Class is a Standard Implementation,
+        Matrix_ Classes have the full functions with extensive implementation
+
+        Both Matrix and Matrix_ are considers as MatObjs and as such share some basic methods and attributes
+
+
+
+
+         Calling this class create a Matrix Object.
+                The class will initialize a Matrix for you by just calling Matrix_()
+                if you want to convert arrays to Matrix Object you use the X parameter
+                    You convert a list to Matrix Object; this will work fine if the
+                        first 2 elements gives the order of the matrix
+
+                        e.g To convert [1,2,3,4,5,6,7,8], this can be a 1x8, 2x4, 4x2 or 8x1
+                            so you indicate the order by adding the order to the begining
+                            if the order is 2 x 4
+                            Mat_A = Matrix(X = [2,4,1,2,3,4,5,6,7,8]
+                            
+                    You can convert 2D array (in form of list)
+                        e.g Mat_A = Matrix_([[1,2],[3,4],[5,6],[7,8]])
+
+                    Also, You convert consistent list or tuple to Matrix Object
+                        e.g Mat_A = Matrix([1,2],[3,4],[5,6],[7,8])
+
+                    You can convert numpy arrays as well
+                        e.g if Y is an numpy.ndarray object, then Mat_A = Matrix_(X = Y)
+
+
+        MatObj.issing returns True if the MatObj is a singular Matrix
+
+        MatObj.isnull  returns True if null else False
+
+        MatObj.isunit  returns True if Unit else False
+
+        MatObj.isdiag  returns True if diagonal else False
+
+        MatObj.isscalar returns True if Scalar else False
+
+        MatObj.islower_delta  returns True if lower triangular else False
+
+        MatObj.isupper_delta  returns True if upper triangular else False
+
+        MatObj.isdelta returns True if triangular else False
+
+        MatObj.isorth returns True if orthogonal else False
+
+        MatObj.issq returns True if sqaure else False
+
+        MatObj.islindep returns True if the vecors are linearly dependent  else False
+
+        MatObj.isempty   returns True if empty else False
+
+        MatObj.isimut  returns True if Immutable else False
+
+        MatObj.isdisabled  returns True if disabled else False
+
+        MatObj.isenabled  returns True if enabled else False
+
+        MatObj.isnilp  returns True if Nilpotent else False
+
+        MatObj.isinv  returns True if Involuntary else False
+
+        MatObj.cols returns the number of columns
+        
+        MatObj.rows  returns the number of rows
+
+        MatObj.order returns the order of the MatObj
+
+        len(MatObj) returns the number of elements
+
+
+
+        MatObj.trn()   returns the transpose of the MatObj
+
+        MatObj.minor(row = 1, col = 1)
+            returns the minor, A.minor(i, j) => Aij
+            by default it returns A11
+
+        MatObj.cofactor(row = 1, col = 1)
+            returns the cofactor, A.cofactor(i, j) => Cij
+            by default it returns C11
+
+        MatObj.cofactors()  returns all the Cofactors of the MatObj
+
+        MatObj.rank   return the rank of the MatObj
+
+        MatObj.adj()    returns the Adjoint Matrix of the MatObj
+
+
+        MatObj.scalar(x,order)
+            returns a diagonal Matrix with scaler x of order order
+            mat_.scalar(4, 3) will return
+            [4   0   0]
+            [0   4   0]
+            [0   0   4]
+
+
+
+        MatObj.get_row(row = 1)
+            return all the elements at a row in list
+            MatObj.row() returns the first row
+            Negative entries are also suppported
+
+
+        MatObj.get_col(col = 1)
+            return all the elements at a column in list
+            MatObj.col() returns the first column
+            Negative entries are also suppported
+
+
+        MatObj.get_diag(diag = '')
+            return all the elements along the diagonals in list
+            MatObj.get_diag() returns the principal diagonal, or give
+            diag argument any value
+
+
+        MatObj.add_col(*col)
+            Add cols to the MatObj
+            MatObj.add_col([...],[....],[....])
+        
+
+
+        MatObj.geomul
+            returns the geometric multiplicity of each eigenvalues in a dictionary
+
+
+        MatObj.algmul
+            returns the algebraic multiplicity of each eigenvalues in a dictionary
+
+        MatObj.random(order, boundary = (-50,50))
+            mat_.random(order, boundary) -> returns a MatObj with random element within the boundaries
+           e.g mat_.random((3,4),(-2, 10)) -> returns 3 x 4 Matrix with elements within -2 and 10 at random
+           by default the boundary is set to -50,50
+        
+        MatObj.reverse()   reverse the elements in the MatObj
+
+
+        MatObj.aug(aug_mat = ''):
+            Concatenate two MatObj
+            MatObj.aug(aug_mat) -> concatenate MatObj with aug_mat
+            MatObj.aug() -> concatenate MatObj with Unit Matrix of the same order
+
+
+        MatObj.diag(values):
+            return a diagonal Matrix of values where values is iterable
+            mat_..diag([....])
+
+
+        MatObj.echelon(unique_diag = True)
+            return the echelon form of the MatObj
+            if unique_diag is set to False, the diagonal will not be unique
+
+
+        
+        MatObj.reduce(to = 'c')
+            return the MatObj in its reduced form
+            to can be set to '', c, u, l for row, column, upper triangular,lower
+            trigangular reductions respectively. by default to is set to c
+
+
+        MatObj.canonical():
+            returns the reduce MatObj in its Canonical form
+
+
+        Both the Matrix Classes offers comparision
+             MatObj1 == MatObj2 returns True of MatObj and MatObj2 has the same entries
+
+
+        for >, >=, <=, < i.e MatObj > X, MatObj >= X etc
+        The rank of the MatObj will be compared to X.  if X is a MatObj its rank will be taken else
+        X can be a number
+
+        MatObjs can works with reversed keyword i.e reversed(MatObj)
+
+        
+        MatObjs works with the 'in; keyword as well
+            x in MatObj returns True if one of the entries of MatObj is x
+
+
+        MatObjs also works with round
+            round(MatObj, x) will return a new MatObj with its elements approximated to x decimal place
+
+
+       copy(MatObj) will return a copy of MatObj
+
+
+        MatObj1 & MatObj2
+        compares the determinant of MatObj1 and to the det of MatObj2 (MatObj can be a number)
+           
+
+        MatObj[x]
+               Returns the element at i, j
+               Use as MatObj[i,j] this will return the element located at row i column j
+
+        MatObj[x] =  X
+
+             Set elements in a MatObj
+                MatObj[i] = value
+                    if i is an integer:
+                        if i < 0, then backward counting; -1 will select the last row, -2 will select the second to the last row and so on
+                        if value i is not a list or tuple, the ith entry of the MatObj will be set to value
+                        else if value is a list or tuple:
+                            if i is within the number of rows, row i will set to the list or tuple elements
+                            else if i is 1 + the number of rows, a new row will be added and its elements will
+                            be set to that of the list or tuple
+                    else if i is a string:
+                        it works just as described above but on the columns not rows
+                MatObj[i,j] = value
+                    The element at row i, col j is set to value
+                    Negative entries are also supported
+
+        bool(MatObj) returns True if the MatObj is not a Null Matrix else False
+
+        
+    
+       For loops
+           MatObjs respond with loops in the following ways
+
+           using MatObjs directly, the rows are returned
+
+           i.e
+               for rows in MatObj:
+                   print(rows)
+
+                the rows will be printed on the screen
+
+           using MatObj.columns, cols are returned
+
+           i.e
+               for cols in MatObj.columns:
+                   print(rows)
+
+                the cols will be printed on the screen
+
+
+            using MatObj.elements, elements at each entries will be returned
+
+            i.e
+                for element in MatObj.elements:
+                    print(element)
+
+                each elements will be printed on the screen
+
+        
+                      ===========
+                      | Matrix_ |
+                      ==========
+        Matrix_ Classes offers all the properties and methods of Matrix Class, but some
+        methods and properties are exclusive to Matrix_ Objecjs.
+
+        All methods are called on Matrix Objects, for methods that independent of the MatObj
+        use like creating null, unit matrices; use mat and mat_ for Matrix and Matrix_
+        respectively.
+
+        * means the method or property is supported by both Matrix and Matrix_ Class
+        ** means the method or property is exclusive to Matrix_ Objects
+
+
+        
+        *MatObj.null(order) returns a null Matrix
+             mat.null((2,3))  for Matrix Objs
+             mat_.null((2,3))  for Matrix_ Objs
+
+
+        *MatObj.unit(order) returns a unit Matrix
+           mat.unit((3,3)) or mat.unit(3) for Matrix Objs
+           mat_.unit((3,3)) or mat_.unit(3) for Matrix_ Objs
+
+
+        **MatObj.vars returns all the variables in the MatObjs
+
+
+        *MatObj.add_row(*row):
+            Add rows to the MatObj
+            MatObj.add_row([...],[....],[....])
+
+
+
+
+        *MatObj.trace returns the trace of the MatObj
+
+
+        *MatObj.LU() Decomposes the MatObj into a Upper and Lower triangular Matrix
+
+
+        *MatObj.perform(operation = '',rows = [],A = 1,B = 1, cols = [])
+        
+            Row operations perform(operation = '',rows = [],A = 1,B = 1, cols = [])
+            For Rows and columns Operation
+
+            To interchange rows, set the operation argument to '~', and the
+                    rows argument to a list or tuple of the two rows to be change
+
+                            [    1  - x        cos(2θ)      sin(3α)]
+                  Let A =   [ 8x^2ln(xy)    2x - tan(2αβ)   cos2(θ)]
+                            [cos(α)sin(β)       1  + x      x^2 - 1]
+                   To interchange row 1 and row 3
+
+                   >>> A.perform('~',[1,3])
+                   now A is
+
+                            [cos(α)sin(β)       1  + x      x^2 - 1]
+                            [ 8x^2ln(xy)    2x - tan(2αβ)   cos2(θ)]
+                            [    1  - x        cos(2θ)      sin(3α)]
+                    To interchange column 2 and 3
+                    >>> A.perform('~',cols = [2,3])
+                    A is now 
+                            [cos(α)sin(β)   x^2 - 1       1  + x   ]
+                            [ 8x^2ln(xy)    cos2(θ)   2x - tan(2αβ)]
+                            [    1  - x     sin(3α)      cos(2θ)   ]
+            Row, col multiplication:
+
+                    To multiply row 2 by 4
+                    >>> A.perform(rows = [4,2]) # or A.perform('',[4,2])
+                    A is now
+                        [cos(α)sin(β)    x^2 - 1        1  + x   ]
+                        [ 32x^2ln(xy)   4cos2(θ)   8x - 4tan(2αβ)]
+                        [    1  - x      sin(3α)       cos(2θ)   ]
+            Addition and Subtraction of Rows and cols:
+                set operation to either + or -, use A, B to set the coefficients
+                of the first and second rows (or cols). By default A = B = 1
+
+                    To Add row 2 to row 1
+                    >>> A.perform('+',[1,2])
+
+                    A is
+                [sin(β)cos(α) + 32x^2ln(xy)   4cos2(θ) + x^2 - 1    - 4tan(2αβ) + 9x +  1 ]
+                [        32x^2ln(xy)               4cos2(θ)             8x - 4tan(2αβ)    ]
+                [           1  - x                  sin(3α)                cos(2θ)        ]
+
+                To add row 1 to row 2
+                >>> A.perform('+',[2,1])
+                
+                A =
+                [sin(β)cos(α) + 32x^2ln(xy)   4cos2(θ) + x^2 - 1     - 4tan(2αβ) + 9x +  1 ]
+                [sin(β)cos(α) + 64x^2ln(xy)   8cos2(θ) + x^2 - 1    - 8tan(2αβ) + 17x +  1 ]
+                [           1  - x                  sin(3α)                 cos(2θ)        ]
+
+                To multiply row 1 by 2 and add row 2 to it
+                >>> A.perform('+',[1,2],2)
+                This is equivalent to
+                >>> A.perform(rows = (2,1))
+                >>> A.perform('+',(1,2))
+                A = 
+                [3sin(β)cos(α) + 128x^2ln(xy)   16cos2(θ) + 3x^2 - 3     - 16tan(2αβ) + 35x + 3]
+                [ sin(β)cos(α) + 64x^2ln(xy)     8cos2(θ) + x^2 - 1     - 8tan(2αβ) + 17x +  1 ]
+                [            1  - x                    sin(3α)                  cos(2θ)        ]
+
+                To multiply row 2 by 3 and add it to row 3
+                >>> A.perform('+',[3,2],B = 3)
+                which is equivalent to
+                >>> A.perform('',[3,2])
+                >>> A.perform('+',[3,2])
+
+                A =
+                [     3sin(β)cos(α) + 128x^2ln(xy)             16cos2(θ) + 3x^2 - 3             - 16tan(2αβ) + 35x + 3   ]
+                [      sin(β)cos(α) + 64x^2ln(xy)               8cos2(θ) + x^2 - 1             - 8tan(2αβ) + 17x +  1    ]
+                [3sin(β)cos(α) + 192x^2ln(xy) - x +  1    24cos2(θ) + sin(3α) + 3x^2 - 3   cos(2θ) - 24tan(2αβ) + 51x + 3]
+
+                To multiply row 1 by x, then multiply row 3 by y and subtract row 1 from row 3
+
+                >>> A.perform('+',[3,1],'y','x')
+                Also equivalent to
+                >>> A.perform('',('y',1))
+                >>> A.perform(rows = ('x', 3))
+                >>> A.perform('-',(3,1))
+
+                A =
+            [                      3sin(β)cos(α) + 128x^2ln(xy)                                            16cos2(θ) + 3x^2 - 3                                          - 16tan(2αβ) + 35x + 3                   ]
+            [                       sin(β)cos(α) + 64x^2ln(xy)                                              8cos2(θ) + x^2 - 1                                           - 8tan(2αβ) + 17x +  1                   ]
+            [3ysin(β)cos(α) + 3xsin(β)cos(α) + 192x^2yln(xy) + 128x^3ln(xy) - xy + y   24ycos2(θ) + 16xcos2(θ) + ysin(3α) + 3x^2y + 3x^3 - 3x - 3y   ycos(2θ) - 24ytan(2αβ) - 16xtan(2αβ) + 51xy + 3x + 3y + 35x^2]
+
+
+            for col operation just use cols = (...)
+
+
+
+        *MatObj.modal() returns the modal matrix of the MatObj
+
+
+        **MatObj.solve(equate = 0, **kwargs)
+          This call the solns method and substitue each solution into the Matrix
+          and return is as a generator
+        
+
+        *MatObj.type returns the type of the Matrix
+
+
+        **MatObj.cal(value = '', **values)
+            For Substitution
+            The values can be parsed as dictionaries or keyword arguments or both
+                    [   3          7       - x - sqrt(a)]
+                Z = [  - 3/2   3log2(a)        - 3/4    ], if a = 4
+                    [x^2 - 6      - 9      2x - 5log2(a)]
+            
+               Z = Matrix_([3,3,3,7d,'-xy - sqrt(a)', -3/2,'3log2(a)',-3c/4,'x^2 -6',-9, '2xy - 5log2(a)'])
+               Zc = Z.cal(a = 4, c = 5, d = -2, y = -7)
+               which is equivalent to
+               Zc = Z.cal({'a' :4, 'c' : 5, 'd' : -2, 'y' : -7})
+               [   3       - 14      7x - 2  ]
+               [  - 3/2     6        - 15/4  ]
+               [x^2 - 6     - 9    - 14x - 10]
+
+
+
+        **MatObj.solns(equate = 0,repeat = False, **kwargs)
+          Returns the values of the unknows when the determinat = equate in tuple
+
+                [   3        7       - x]
+           A =  [  - 3/2   x - 2     5  ], if |A| = 10, find x
+                [x^2 - 6     - 9   x + 2]
+
+            >>> A = Matrix_([3,3,3,7,'-x', -3/2,'x-2',5,'x^2 -6',-9, 'x+2'])
+            >>> A.solns(10)
+            which gives (-1.5487461869840489, 1.4235819144877857)
+
+                    [   3         7d       - xy - sqrt(a)]
+               Z =  [  - 3/2   3log2(a)        - 3c/4    ]
+                    [x^2 - 6      - 9      2xy - 5log2(a)]
+            
+                find x, given that a = 4, c = 5, d = -2, y = -7 and |A| = -5
+             >>> Z = Matrix_([3,3,3,'7d','-xy - sqrt(a)', -3/2,'3log2(a)','-3c/4','x^2 -6',-9, '2xy - 5log2(a)'])
+             >>> Z.solns(-5, a = 4, c = 5, d = -2, y = -7)
+             which is equivalent to
+             >>> Z.solns(-5, **{'a': 4, 'c': 5, 'd': -2, 'y' : -7})
+             which gives (1.182787466260118, 3.290717213374106, -2.937790393919938)
+             
+        **MatObj.lin_diff(var = 't')
+            different each entries wrt var
+            similar in operation to ExprObj.lin_diff()
+            see Expr Documentation for more
+
+
+        *MatObj.isscalar returns True if Scaler else False
+
+
+        *MatObj.issym  returns True if Symmetric else False
+
+
+        *MatObj.isskw_sym  returns True if Skew Symmetric else False
+
+
+        *MatObj.isidemp  returns True if Idempotent else False
+        
+
+        *MatObj.isperiodic returns True if periodic else False
+
+
+        **MatObj.isherm  returns True if Hermitian else False
+
+
+        **MatObj.isunitary    returns True if Unitary else False
+
+
+        **MatObj.iscomplex  returns True if Complex else False
+
+
+        **MatObj.isskw_herm   returns True if Skew-Hermitian else False
+
+
+        *MatObj.spectral   returns the spectral Matrix of a MatObj
+
+
+        **MatObj.toequation(eq = '', var = '') returns set of eqns of the MatObj multiplied with a column vector (variables)
+           MatObj.toequation([....], ['x1','x2','x3',.....])
+
+
+        **MatObj.conj() returns the conjugate of the MatObj
+
+        *MatObj.crack()  decomposes the MatObj into two MatObjs
+            if the MatObj is a regular Matrix it will be decompose to
+
+
+        *MatObj.nullspace() returns all the linearly independent column vectors of the Matrix
+
+
+        **MatObj.theta() returns the transpose of the conjugate of the MatObj
+
+
+        *MatObj.ev(repeat = False) returns all the real eigen values of the MatObj
+            if repeat is True repeated eigen values will be included
+            
+
+        *MatObj.property()  Displays the properties of the MatObj
+
+
+        **MatObj.simp() rewriting all entries in concise form if possible
+
+
+        *abs(MatObj) returns the determinant
+        
+        
+        **MatObj1 | MatObj2
+          compares two MatObjs
+          compare entries of MatObj1 to the correspondingly for equivalence to entries of MatObj2
+
+
+        *~MatObj
+            returns the inverse of the Matrix
+           ~MatObj -> MatObj^-1
+
+
+        **MatObj1 >> MatObj2
+          To Compare two Matrices and find the unknowns
+
+            A = [x + 3   2y + x],    B = [0    - 7]
+                [z - 1   4a - 6]         [3    2a ]
+
+            >>> A >> B
+            will give [{'x': -3, 'y': -2, 'z': 4, 'a': 3}]
+            which are the solutions
+
+
+        **MatObj1 << MatObj2
+          To Compare two Matrices and solve them
+
+            A = [x + 3   2y + x],    B = [0    - 7]
+                [z - 1   4a - 6]         [3    2a ]
+
+            >>> A << B
+            now 
+            A, B  are now solved
+
+
+        *Set elements in a MatObj
+            MatObj[i] = value
+                if i is an integer:
+                    if i < 0, then backward counting; -1 will select the last row, -2 will select the second to the last row and so on
+                    if value i is not a list or tuple, the ith entry of the MatObj will be set to value
+                    else if value is a list or tuple:
+                        if i is within the number of rows, row i will set to the list or tuple elements
+                        else if i is 1 + the number of rows, a new row will be added and its elements will
+                        be set to that of the list or tuple
+                else if i is a string:
+                    it works just as described above but on the columns not rows
+            MatObj[i,j] = value
+                The element at row i, col j is set to value
+                Negative entries are also supported
+
+
+
+    '''
