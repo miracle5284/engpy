@@ -1,2 +1,2 @@
 # engpy
-Python for Engineers
+Python for Engineering
