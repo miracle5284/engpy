@@ -1,0 +1,138 @@
+'''
+            AI Implementation can be rewrite Object in another form based on the laws given
+            The AI takes mainly 2 arguments; action and reduce
+            The AI work in three modes, which are triggered by reduce: reduce set to true will
+            prompt the AI to look for ways to rewrite the Objects in a more concise, else the AI will
+            just try to rewrite the Obj based on AI models in either direction; this the default mode.
+            However, if expand is provided and not False the AI will try to expand the Obj.
+
+            AI being a generator generates a new Obj to replace the Obj itself. each AI operation has a chain keeping track of itself, this is triggered by action
+            action can be 'next', 'continue', 'reject'.
+            when action = 'next', prompt the AI to resume from its current state or initiate a state if not already
+            when action = 'continue' will prompt the AI to restart the AI based on the current state
+            when action = 'reject' will prompt the AI to restore the Obj to the previous state, and then continue
+            when action = 'restore' will prompt the AI to restore the Obj to the previous state
+            when action = 'recover' will prompt the AI to restore the Obj to the initial state destructively.
+
+
+            A = 2sin2(2θ) + 2cos2(2θ)
+            To rewrite this Expr in a concise form
+            >>> A = Expr('2sin2(2theta) + 2cos2(2theta)')
+            >>> A(reduce = True)
+            >>> A
+            2
+
+            Note that anytime one of the models is applied, the AI pause save the state, the action arg
+            can be used to control these states.
+            
+            A = sin(2φ) + sec2(α^2 + β^2 - γ^2) + 3cos(2ω) + 6sin2(ω) - tan2(α^2 + β^2 - γ^2)
+            To expand this
+            >>> A(expand = True)
+            >>> A
+            sec2(α^2 + β^2 - γ^2) + sin(2φ) + 3cos2(ω) + 3sin2(ω) - tan2(α^2 + β^2 - γ^2)
+
+            Now the sin(2φ) was expanded, Now to continue expanding, we set action to next,
+            however, by default action is set to 'next'. 
+            >>> A()  # or A(action = 'next')
+            >>> A
+            3cos2(ω) + 3sin2(ω) + sin(2φ) + 1
+
+            This is because sec2(α^2 + β^2 - γ^2) was expanded to 1 + tan2(α^2 + β^2 - γ^2), which
+            was added to - tan2(α^2 + β^2 - γ^2) to sum to 1
+
+            if there's need to switch another mode, action can be set to continue
+            Let's assume we need to reduce this
+            >>> A(action = 'continue', reduce = True)
+            >>> A
+            sin(2φ) + 4
+
+            Thus, the AI has now rewrite the ExprObj,
+            sin(2φ) + sec2(α^2 + β^2 - γ^2) + 3cos(2ω) + 6sin2(ω) - tan2(α^2 + β^2 - γ^2) to
+            sin(2φ) + 4
+
+            To confirm, let B be a copy of A
+            >>> B = copy(A)
+            Now we can use the recover action to recover A back
+            >>> A = A('recover')
+            >>> A
+            sin(2φ) + sec2(α^2 + β^2 - γ^2) + 3cos(2ω) + 6sin2(ω) - tan2(α^2 + β^2 - γ^2)
+            >>> A | B
+            True
+
+            Incase we wish to reject the expansion of sec2(α^2 + β^2 - γ^2) for sin(2φ), we use the
+            reject action
+
+            A = sin(2φ) + sec2(α^2 + β^2 - γ^2) + 3cos(2ω) + 6sin2(ω) - tan2(α^2 + β^2 - γ^2)
+            To expand this
+            >>> A(expand = True)
+            >>> A()  # or A(action = 'next')
+            >>> A
+            3cos2(ω) + 3sin2(ω) + sin(2φ) + 1
+            >>> A(action = 'reject')
+            >>> A
+            sec2(α^2 + β^2 - γ^2) + 3cos2(ω) + 3sin2(ω) + 2sin(φ)cos(φ) - tan2(α^2 + β^2 - γ^2)
+            We can see that the expansion of sec2(α^2 + β^2 - γ^2) was reversed, and the operation resumed
+            from the previous state when 3cos(2ω) was expanded
+
+            >>> A('continue', reduce = True)
+            >>> A
+            sec2(α^2 + β^2 - γ^2) + 2sin(φ)cos(φ) - tan2(α^2 + β^2 - γ^2) + 3
+
+            We can restore A to its previous state to continue expanding
+            >>> A('restore')
+            sec2(α^2 + β^2 - γ^2) + 3cos2(ω) + 3sin2(ω) + 2sin(φ)cos(φ) - tan2(α^2 + β^2 - γ^2)
+
+            >>> A('continue', expand = True)
+            >>> A
+            3cos2(ω) + 3sin2(ω) + 2sin(φ)cos(φ) +  1
+
+            >>> A('continue', reduce = True)
+            >>> A
+            2sin(φ)cos(φ) + 4
+            
+            To exapand, we can specified the degree; these are deep, broad expand, in_depth
+            when expand =  deep, instead of the AI to pause states, it keep on expanding, till no
+            none of the models can expand further.
+            when expand = broad expand, the AI will rank all models available for expansion, the use the model
+            with the highest rank to expand the Obj, and the pause the state.
+            when expand = in_depth, the AI keep on working with exapand set to broad expand till no further
+            expansion is possible
+
+            A = Expr('2sin(2φ) + 2sin(2ω)')
+            >>> A(expand = 'deep')
+            >>> A
+            4sin(ω)cos(ω) + 4sin(φ)cos(φ)
+            
+            We can see that all expansion was done before the AI pause
+
+            A = 2sin(2φ) + 2sin(2ω)
+            >>> A(expand = 'broad expand')
+            >>> A
+            4sin(φ + ω)cos(φ - ω)
+
+            which can still be expanded further
+            A = 2sin(2φ) + 2sin(2ω)
+            >>> A(expand = 'in_depth')
+            >>> A
+            4sin(ω)cos2(φ)cos(ω) + 4sin2(ω)sin(φ)cos(φ) + 4sin(φ)cos2(ω)cos(φ) + 4sin2(φ)sin(ω)cos(ω)
+
+            As AI is needed most time to reduce the Obj concisely, used the send method
+            
+            Z = tan2(α + βω) - 2xsin2(θ) + 2sin(δ)cos(δ) + 1 + 2xcos2(θ) 
+            >>> z = Z.send()
+            >>> z
+            sec2(α + βω) + sin(2δ) + 2xcos(2θ)
+            >>> Z 
+            1  + tan2(α + βω) - 2xsin2(θ) + 2xcos2(θ) + 2sin(δ)cos(δ)
+            
+            meanwhile Z is still intact.
+
+            However, if changes is to be make internally, set reduce = 'in_depth'
+            Z = 1  + tan2(α + βω) - 2xsin2(θ) + 2xcos2(θ) + 2sin(δ)cos(δ)
+            >>> Z(reduce = 'in_depth')
+            >>> Z
+            sec2(α + βω) + sin(2δ) + 2xcos(2θ)
+
+            Now the change effected in Z itself
+            
+'''

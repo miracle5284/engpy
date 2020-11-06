@@ -1,0 +1,1067 @@
+'''                   ========
+                      | Expr |
+                      ========
+        The Base Class is for all Algebraic Manipulations
+        Expr Objects are Mathematical Functions or Expressions
+
+        The Expr class takes either a dict object or string:
+
+        1. Strings:
+            Conversion of strings to Expr Objects conforms to
+            Linear Math Input. Use strings when representing
+            complex or long Expressions in Expr Object
+
+            e.g
+                1. P(x) = 2x^3 + 4x^2 - 11x - 7
+                    To represent this with Expr class
+
+                    >>> from engpy.tools.exprs import Expr
+                    >>> Px = Expr('2x^3 + 4x^2 - 11x - 7')
+
+                2. F(x,y) = -3x^2y - 4xy^2 + 15xy - 4
+                
+                    To represent this with Expr class
+                    >>> from engpy.tools.exprs import Expr
+                    >>> Fxy = Expr('-3x^2y - 4xy^2 + 15xy - 4')
+
+                3. F(x) = 2sin(x) + 7h^2sin(-3x)cos(x + y) - 4tan2(x^2)
+                    >>> from engpy.tools.exprs import Expr
+                    >>> Fx = Expr('2sin(x) + 7h^2sin(-3x)cos(x + y) - 4tan2(x^2)')
+
+                Note:
+                    1.  Space don't count when representing expressions.
+                        e.g Expr('2  x  yco  s( -3x) + 5 x^ -2 + 4xy+log2(25x)')
+                        is the same as Expr('2xycos(-3x) + 5x^-2 + 4xy + log2(25x)')
+                    2.  When exponents are in form of product use bracket
+                        e.g
+                            P(s) = s^2 + s^2t + s^-2r
+                            >>> from engpy.tools.exprs import Expr
+                            >>> Ps = Expr('s^2 + s^(2t) + s^(-2r)')
+                            because E('s^2 + s^2t + s^-2r') is the same as
+                            Expr('s^2 + t * s^2 - r * s^-2') which entirely different
+            Expr strings can also contain greek alphabets
+            e.g
+                V(t) = Vsin(ωt)
+                >>> Vt = Expr('Vsin(omega t)')
+                since space doesn't count this is the same as 
+                >>> Vt = Expr('Vsin(omegat)')
+
+                Expr strings can also contain subscripts
+
+                I(c) = I0 sin(ωt + π/2)
+                >>> I = Expr('I0 sin(omegat + pi/2)')
+
+                X(c) = 1/2πf0C
+                >>> X = Expr('1/2pif0C')
+
+                Z(t) = 2π/(L/C)^0.5
+                >>> Zt = Expr('2pi/sqrt(L/C)')
+
+            For common alphabet like e (exp as in 2.718281828459045) put . in front
+
+            F(t) = exp^(-2t) + exp(2t)
+
+            >>> Ft = Expr('.e^(-2t) + .e^(2t)
+
+            For complex numbers use .i, .j, .k
+
+        2. Dict -Object
+            Conversion of Dict object to Expr Objects follow this pattern
+
+            {coefficient:list of dict-object with the same coefficients}
+
+            NoTE: The coefficients must be either integer or float
+                  The list must be list of dict-objects with variables as the keys
+                  and values as the powers
+            e.g
+               P(x) = 2x^3 + 4x^2 - 11x - 7
+               >>> Expr({2:[{'x':3}], 4:[{'x': 2}], -11:[{'x': 1}], -7:[{'':0}]})
+               Note that this is the same as Expr('2x^3 + 4x^2 - 11x - 7')
+
+               P(x,y) = 2x^3y^2 + 2xy^3 - 4x^2 - 11xy - 7
+               >>> Expr({2: [{'x': 3, 'y': 2}, [{'x': 1, 'y': 3}], -4: [{'x': 2}], -11: [{'x': 1, 'y': 1}], 7: [{'': 0}]})
+            Be careful, any mistake in the format may lead to undesired or corrupt Expression.
+               
+
+            However, even though using dict format with difficult and stressfull, it's much much much faster than using strings.
+
+            But for complex expressions like, trigs, log, ln use strings
+
+
+             Addition of Expr Objects
+            ========================
+
+            Addition can happen btwn 2 Expr Objects, if the other party is not
+            an Expr Object, it will be converted
+
+            e.g
+                >>> Px = Expr('2x^3 - 2x')
+                >>> T = Expr('3xcos(theta)')
+                >>> PTx = Px + T
+
+                This may be written in a line
+                >>> PTx = Expr('2x^3 - 2x') + Expr('3xcos(theta)')
+                which is the same as
+                >>> PTx = Expr('2x^3 - 2x') + '3xcos(theta)'
+    
+
+            Subtraction of Expr Objects
+            ========================
+
+            Subtraction are supported btwn 2 Expr Objects, if the other party is not
+            an Expr Object, it will be converted
+
+            e.g
+                >>> Px = Expr('2x^3 - 2x')
+                >>> T = Expr('3xcos(theta)')
+                >>> PTx = Px - T
+
+                This may be written in a line
+                >>> PTx = Expr('2x^3 - 2x') - Expr('3xcos(theta)')
+                which is the same as
+                >>> PTx = Expr('2x^3 - 2x') - '3xcos(theta)'
+
+
+            Methods for Expr Objects
+            ========================
+            Expr Objects support substitution
+
+                S(t) = ut + 0.5at^2; To calculate S(t) when u = 0, t = 4, a = 9.8
+
+                Three options are available
+                1. Bulding the values into a Python dictionary
+
+                    >>> from engpy.tools.exprs import Expr
+                    >>> St = Expr('ut + .5at^2')
+                    >>> s = St.cal({'u': 0, 't': 4, 'a': 9.8})
+                  Note: Using this approach all variables must convert to strings
+
+                2. Using the = sign
+                    Note that Expr calculates angles in radians by default, if the
+                    angles is in degrees add deg to the string
+                    y = xtan(θ) - gx^2sec2(θ)/2u^2
+                    find y when x = 20, θ = 32.29, u = 30, g = 9.8
+                    
+                    >>> y = Expr('xtan(θ) +- gx^2sec2(θ)/2u^2')
+                    >>> y.cal( x = 20, theta = '33.29deg', u = 30, g = 9.8)
+
+                3. if the expressions only has one unknown, no specification is needed
+                     y = x^3 - 6x^2 + 12x - 8; find y when x = 6.2
+
+                     >>> y = Expr('x^3 - 6x^2 + 12x - 8')
+                     >>> y.cal(6.2)
+
+                You combine both option 1 and option 2
+
+
+                Note that all values in strings are converted to Expr Objects, which
+                means you can also put/nest an Expr Object into another
+
+                e.g
+                    if f(x) = 3x + 1 and g(x) = 2x - 1, and h(x) = x^2
+
+                    find fog, hof
+
+                    >>> fx = Expr('3x + 1')
+                    >>> gx = Expr('2x - 1')
+                    >>> fog = fx.cal(gx)
+                    
+                    Which can also be done as
+                    
+                    >>> fx = Expr('3x + 1')
+                    >>> fog = fx.cal('2x - 1')
+                    
+                    >>> hx = Expr('x^2')
+                    >>> hof = hx.cal('3x + 1')
+
+                4. if you want to enter the values in real-time, just call cal
+                    >>> fx.cal()
+                     as such cal method will iterate all the variables and prompt you
+                     to enter the values, just press enter straight up to skip any variable
+                     which has no value
+
+                y = z^2 - 2xzcos(α), simplify when x = -15, α = π/6
+                >>> y = Expr('z^2 - 2xzcos(alpha)')
+                >>> y.cal(x = -15, alpha = 'pi/6')
+                This will yield z^2 + 15sqrt(3)z
+                Note that since z is not given, so we still have z after simplifying
+
+                To request for the value at runtime we use
+                >>> y.cal()
+                this will prompt you to enter the values, since z is not given, just
+                skip it by hitting enter.
+                
+            ++++++++++
+            |Desolved|
+            ++++++++++
+                To convert all constants to their respective values
+                A = πr^2
+                >>> A = Expr('pir^2')
+                >>> A.desolve
+                This will result to 3126535r^2/995207
+
+            ++++++
+            |_cal|
+            ++++++
+                ExprObj._cal(value = '', desolve = False, desolved = False, simp = True, **values)
+                
+                Using _cal method safe call cal, if no values are given, the Expr
+                Object will be returned instead of prompting you to enter the
+                values
+
+                Use _cal when you are not sure if a value will be given
+
+            ++++++
+            |diff|
+            ++++++
+                def diffs(self,res = '', **kwargs)
+                
+                Partial Derivatives with some constant
+                if F(x) = x^2 - y^2, Find  îF'(x) - ĵF'(y)
+
+                >>> Fx = Expr('x^2 - y^2')
+                >>> Fx.diffs(x = '.i', y = '.j')
+                or
+                >>> Fx.diffs({'x': '.i', 'y': '.j'})
+            
+            ++++++++++
+            |inconsts|
+            ++++++++++
+                def inconsts(self, strict = False)
+                
+                Re-writing Expr Objects in form of constants
+                Making strict True means you are strictly substituting constants
+
+
+            ++++++++++
+            |in_pi|
+            ++++++++++
+                def in_pi:
+                Re-writing in form of π strictly
+
+
+            ++++++++++
+            |to_pi|
+            ++++++++++
+                def to_pi:
+                Re-writing in terms of π strictly
+
+            +++++++++++++
+            |in_radicals|
+            +++++++++++++
+                def in_pi:
+                Re-writing in terms of roots of prime numbers
+
+            ++++++++++
+            |inroots|
+            ++++++++++
+                def in_pi:
+                Re-writing in terms of roots of numbers
+
+            ++++++++++++
+            | lin_diff |
+            ++++++++++++
+
+                def lin_diff(self,var_ = '', repeat = 1,*args, **kwargs)
+                
+                Linear Differentiation
+
+                Differentiating Expr Objects in respect to var_
+
+                if y = 1/(x^2 + 4) find dy/dx
+
+                >>> y = Expr('1/(x^2 + 4)')
+                >>> dydx = y.lin_diff('x')
+                
+                This will result to ( - 2x/(x^4 + 8x^2 + 16))
+
+
+                if u = θcos(θ)/(θ + 3), find f'(θ)
+
+                >>> u = Expr('thetacos(theta)/(theta + 3)')
+                >>> du = u.lin_diff('theta')
+                
+                This will result to ((3cos(θ) - θ^2sin(θ) - 3θsin(θ))/(θ^2 + 6θ + 9))
+
+
+                For higher derivatives add the repeat argument
+
+                if  y = tan(θ), find f''(θ)
+
+                >>> y = Expr('tan(theta)')
+                >>> f2 = y.lin_diff('theta', 2)
+
+                This will result to 2sec2(θ)tan(θ)
+
+
+                If some calcalation are to be made on the differential, extra arguments
+                can be provided which will call the cal method automatically
+
+                Find the gradient of tangent to the curve y = x^2/(x^2 + 1) at the point
+                with abscissa 1.
+
+                These means we find the differential and then put x =  1
+
+                >>> y = Expr('x^2/(x^2 + 1)')
+                >>> dy = y.lin_diff('x')
+                >>> grad = dy.cal(1)
+
+                grad result to 1/2
+
+                However, we can make lin_diff method to cal itself with some extra arguments
+                the format is ExprObj.lin_diff(var, repeat, extra_arguments)
+
+                So we can  solve the above question as
+                >>> y = Expr('x^2/(x^2 + 1)')
+                >>> grad = y.lin_diff('x', 1, 1)
+                
+                grad is still 1/2
+
+                if f(x) = 3a^2x^3 - 4abx^2 + 16a^2bx - 12, find the gradient of the tangent
+                to the tangent of f(x) at x = -3 when a = -5, b = 3
+
+                >>> fx = Expr('3a^2x^3 - 4abx^2 + 16a^2bx - 12')
+                >>> grad = fx.lin_diff('x',2, x = -3, a = -5, b = 3)
+
+                grad = -1,230
+
+
+            ++++++++++++
+            | lin_diff |
+            ++++++++++++
+            
+                def simp(self,psort = False, desolve = True)
+        
+                Simplifying Expr Objects
+
+                Call on the simp method when simplification like arrangements,
+                collection of like terms, removing Zero terms
+
+                y = - cba -xzqa + 3 - 2x + 4bac + 5 - 7zaqx - 7x - abc + 2qax + 8zxaq + 9x-3bca - 1
+
+                >>> y = Expr('- cba -xzqa + 3 - 2x + 4bac + 5 - 7zaqx - 7x - abc + 2qax + 8zxaq + 9x-3bca - 1')
+                >>> ysimp = y.simp()
+
+                Which gives - abc + 7 + 2aqx
+
+                Note that multiplication, division, exponents, differentiation, cal, and most operation call this before
+                returning, so such method would returned a simplified Expr Object, so calling this method may not be neccesaary
+                after such method.
+
+                Simplify,
+                - x^4î^2 - î^2x^2 - x^2î^2 - î^2 - x^5î - îx^3 - x^3î - îx + x^5î + x^3î + x^3î + xî + x^6 + x^4 + x^4 + x^2
+
+                >>> E = Expr('- x^4.i^2 - .i^2x^2 - x^2.i^2 - .i^2 - x^5.i - .ix^3 - x^3.i - .ix + x^5.i + x^3.i + x^3.i + x.i + x^6 + x^4 + x^4 + x^2')
+                >>> E.simp()
+                which gives 3x^4 + 3x^2 +  1  + x^6
+
+
+            +++++++++++++
+            |Transforms |
+            +++++++++++++
+                def transform
+        
+                Expr Objects Also support Transforms.
+                calling this method will return the Transform class.
+
+                This Transform class contains the laplace transform, z-transform, fourier transform
+                hilbert transform.
+
+                Laplace Transforms
+                ==================
+
+                    To obtain the lapace transform use the laplace method of the Transform class
+                    this method takes in two arguments, the input variable and the output variable of the transform
+
+                    e.g Find the Lapalace Transform of 4e^(2t) + 3cosh(4t)
+
+                    >>> L = Expr('4.e^(2t) + 3cosh(4t)')
+                    >>> L.transform.laplace()
+
+                    This will give ((2s^2 - 2s - 16)/(s^3 - 2s^2 - 16s + 32))
+
+                    find the Laplace Transform of 2sin(3t) + 4sinh(3t)
+
+                    >>> L = Expr('2sin(3t) + 4sinh(3t)')
+                    >>> L.transform.laplace()
+
+                    This will give ((18s^2 + 54)/(s^4 - 81))
+
+                    The default parameter for input variable and out variable are t
+                    and s respectively.
+
+                    if X(t) = e^(3t)sinh(2t) find the laplace in terms of ω
+
+                    >>> Xt = Expr('.e^(3t)sinh(2t)')
+                    >>> Xt.transform.laplace(out_var = 'omega')
+
+                    which is (2/(ω^2 - 6ω + 5)
+
+                    Find the laplace transform of f(ω) = 3e^(-ω) + cos(2ω) - 3sin(2ω) in
+                    terms of φ
+
+                    >>> f = Expr('3.e^(-omega) + cos(2omega) - 3sin(2omega)')
+                    >>> f.transform.laplace('omega','phi')
+
+                    Laplace transforms can also be expressed in another Expr Object
+
+                    Find the laplace transform of 4 + 5e^(2t) in terms of s + γ
+
+                    >>> L = Expr('4+5.e^(2t)')
+                    >>> L.transform.laplace(out_var = 's + gamma')
+
+                    Which gives ((9s + 9γ - 8)/(s^2 + γ^2 + 2sγ - 2s - 2γ))
+
+            +++++++++++++
+            | integrate |
+            +++++++++++++
+                def integrate(self,var_ = 'x', repeat = 1, *args, **kwargs):
+    
+                The Integral of Expr Objects
+    
+            +++++++++++++
+            |  subject  |
+            +++++++++++++
+                def subject(self,var, eq = 0)
+
+                Making var subject of Formula of the expression when == eq
+
+                if y^2 = 3x^3 + 4; make x the subject
+
+                >>> y = Expr('3x^3 + 4')
+                >>> y.subject('x, 'y^2')
+                (0.3333333333333333y^2 - 1.3333333333333333)^0.3333333333333333
+
+    
+            +++++++++++++
+            | visualize |
+            +++++++++++++
+                def visualize(self, color = 'g',linewidth = 2, *args, **kwarg)
+            
+                This method returns the Visual Class for visualizing Graphs
+
+                if f(x) = 3xcos(x) - 2sinh(2x) + 3
+                To Visualize this Function on the graph with in range -5 to 7
+
+                >>> Fx = Expr('3tcos(t) - 2sinh(2t) + 3')
+                >>> Fx.visualize(t = Range(-5, 7)).plot
+
+                if visualize the sinusoid cos(ωn + φ) given that ω = 'pi/6', φ = 'pi/4', within n = 0 and n = 36
+                >>> X = Expr('cos(omegan + phi)')
+                >>> X.visualize(omega = 'pi/6', phi = 'pi/4', n= Range(0,36)).plot
+
+
+            +++++++++++++
+            |clear_frac |
+            +++++++++++++
+                def clear_frac(self, proofing = False):
+                Equating the expression to Zero and clear fractions and negative indices
+
+                use the proofing argument to suppress any unknown error encountered,
+                instead the Expr Object itself is returned
+
+            +++++++++++++
+            |   reform  |
+            +++++++++++++
+                def reform(self):
+                return an equivalent Expr
+
+                The reform method restructure the Expr by assuming it equals zero
+
+                Rewrite y + 1/x - 4
+
+                >>> Expr('y + 1/x - 4').reform()
+                xy + 1 - 4x
+
+                Rewrite 1 /(sqrt(x^2 - 24) + x) + 3/( - sqrt(x^2 - 24) + x) = 11/12
+                >>> Expr('1 /(x + sqrt(x^2 - 24)) + 3/(x - sqrt(x^2 - 24)) - 11/12').reform()
+                176x - 12x^2 - 580
+
+                Rewrite the resulting function when a function mapping given by
+                    f(x,y) = 2x^2 + 2xy + 3x + 3y^2 - 2y - 2, was mapped into y - plane
+                    by a function given by f(y) = (-26-5y^2-4y)/(16y -5)
+
+                >>> fxy = Expr('2x^2 + 2xy + 3x + 3y^2 - 2y - 2')
+                >>> fy = Expr('(-26-5y^2-4y)/(16y -5)')
+                >>> result = fxy.cal(x = fy)
+                Now the resulting function, result is now
+                    329y^2/128 + 4(8.668212890625y/(16y - 5)) + 2(769.4122467041016/(256y^2 - 160y + 25))
+                    - 3275y/1024 + 103( - 27.73828125/(16y - 5))/64 + ( - 55.4765625y/(16y - 5))
+                    - 91791/32768
+                To rewrite this function in cool form
+                >>> result.reform()
+                which gives 658y^4 - 1230y^3 - 474y^2 - 242y + 1692
+
+                This can be done in a single line
+                >>> Expr('2x^2 + 2xy + 3x + 3y^2 - 2y - 2').cal(x = '(-26-5y^2-4y)/(16y -5)').reform()
+                which also yield 658y^4 - 1230y^3 - 474y^2 - 242y + 1692
+            
+
+            +++++++++++++
+            |  tables   |
+            +++++++++++++
+                def tables(self, values = '', fig = False, var = None, **value)
+
+                This method return table of values in Dict
+
+                For function f(z) = 3z^3 - z^2 + 17z - 15
+                Obtain a table for f(z) for the values
+                (-10, -7, -5, -3/2, -1/7, 0 , 2, 31/7, -1)
+                >>> fz = Expr('3z^3 - z^2 + 17z - 15')
+                fz.tables((-10, -7, -5, -3/2, -1/7, 0 , 2, 31/7, -1))
+
+                which will result to
+                {-10:  - 3285, -7:  - 1212, -5:  - 500, -1.5:  - 423/8,
+                -0.14285714285714285:  - 5988/343, 0:  - 15, 2: 39,
+                4.428571428571429: 103324/343, -1:  - 36}
+
+                For function f(t) = 3sin(t) - 3cos(3t) + 3
+                Obtain a table for f(t) in range -2π to 2π,
+                in the interval 1
+
+                >>> ft = Expr('3sin(t) - 3cos(3t) + 3')
+                >>> ft.tables(t = Range('-2pi', '2pi'))
+
+                or
+                >>> ft.tables({'t': Range('-2pi', '2pi')})
+
+                {-6.283185307179586: 0ȩπ, -5.283185307179586: 7808341/919235,
+                -4.283185307179586: 2227273/782218, -3.2831853071795862: 3822154/620807,
+                -2.2831853071795862:  - 1789743/993215, -1.2831853071795862: 365338/152079,
+                -0.28318530717958623: 61354/339341, 0.7168146928204138: 78sqrt(86)/367 + 197sqrt(54)/881 + 3,
+                1.7168146928204138: 2646992/563725, 2.7168146928204138: 4232327/827795,
+                3.7168146928204138: 854875/944423, 4.716814692820414: 1238/31059,
+                5.716814692820414: 1506691/849236}
+
+                
+                
+                if the Expression only has a unknown variable, only the
+                value can be written
+                since ft only has an unkown variable t
+                >>> ft.tables(Range('-2pi', '2pi'))
+
+                Note if more than one unkown is present, the value will be assign to the
+                first variable return by the vars property
+
+                for other intervals other than 1, add the interval to the arguments
+                >>> ft.tables(Range('-2pi', '2pi', 1.5))
+
+                which is
+                {-6.283185307179586: 0ȩπ, -4.783185307179586: 4249478/641443,
+                -3.2831853071795862: 3822154/620807, -1.7831853071795862:  - 639135/372163,
+                -0.28318530717958623: 61354/339341, 1.2168146928204138: 5515417/653957,
+                2.7168146928204138: 4232327/827795, 4.216814692820414:  - 1735887/660412,
+                5.716814692820414: 1506691/849236}
+
+                Setting the fig parameter to be True will return the values in Figures.
+                 
+
+            
+            +++++++++++++
+            |  solve   |
+            +++++++++++++
+                def solve(self,equate = 0,rejection = True,fix = '', **kwargs)
+        
+                Solve Expr Objects when equals to the equate value
+
+                if f(x) = 38x^4 - 127x^2 + 7x^3 - 21x + 39, Find the
+                values of x for which f(x) = 0
+                >>> fx = Expr('38x^4 - 127x^2 + 7x^3 - 21x + 39')
+                >>> soln = fx.solve()
+                To get the values, use next(soln)
+                >>> next(soln)
+                will yield 0.5
+                the next function will keep on returning the values of x
+                till StopIteration is raised when all the values of x
+                has been returned
+
+                Solve the Eqns
+                cos(2θ) + cosec2(-3θ) - θ^2 - θ - 1 = 3tan2(2θ) - cot(θ)
+
+                >>> eqn = Expr('cos(2theta)+cosec2(-3theta) - theta^2 - theta -1')
+                >>> soln = eqn.solve('3tan2(2theta) - cot(theta)')
+                >>> next(soln)
+                This should yield 0.9748222067356423
+
+                if only one solution is needed use solved method instead
+                it accepts the same arguments as solve
+                f(x) = (x + sin(x))/(1+cos(x)) and g(x) = 1/sin(x)
+
+                Find  a value for x at which f(x) = g(x)
+
+                >>> fx = Expr('(x + sin(x))/(1+cos(x))')
+                >>> gx = Expr('1/sin(x)')
+                >>> x = fx.solved(gx)
+
+                x has a value of 0.9970497122338364
+
+                Some Expressions need some reforming so as to be solved, which
+                give rise to extraneous roots, by default the rejection arg has been
+                set to True to reject all extraneous solutions
+
+                Solve the equation 1/x + 1/sqrt( - x^2 + 10) = 4/3
+                To get all the solutions
+                >>> eqn = Expr('1/x + 1/sqrt( - x^2 + 10)')
+                >>> all_soln = eqn.solve(4/3,rejection = False)
+                >>> while True:
+                        try:
+                            print(next(all_soln))
+                        except StopIteration:
+                            break
+                4 solutions are printed which are 1, 3, 0.6040496217739162, -3.104049621773916
+                Because this is radical expression, the reform method may have been called at some
+                point thereby rewriting the expression, so it's likely one or more of those solutions
+                extraneous root.
+
+                let's plug in the solutions to find out the extraneous roots.
+                since we are finding the value of eqn for different values of x, we use tables
+                >>> eqn.tables((-3.104049621773916, 1, 3, 0.6040496217739162))
+                which result in 
+                {-3.104049621773916: 4/3, 1: 4/3, 3: 4/3, 0.6040496217739162: 1937469/979681}
+                it's clear that 0.6040496217739162 is an extraneous root as it doesn't agree with the eqn
+                
+                By default the rejection is already set to True to reject extraneous
+                solutions.
+
+                >>> all_soln = Expr('1/x + 1/sqrt( - x^2 + 10)').solve(4/3)
+                >>> while True:
+                        try:
+                            print(next(all_soln))
+                        except StopIteration:
+                            break
+                            
+                The results are 1, 3, - 3.104049621773916
+                The solution 0.604049621773916 has been removed
+
+
+
+            +++++++++++++
+            |  split   |
+            +++++++++++++
+                def split(self,var = '')
+        
+                This method breaks Expr Objects into two fragments
+                it collects all terms with the var arguments and separate it
+                and return the fragemts in a tuple
+
+                y = 3xcos2(2t) - cot(t)sec2(t) + x^2t - 6plog2x(5x) + 2
+                To separate terms with x from the expression
+
+                >>> y = Expr('3xcos2(2t) - cot(t)sec2(t) + x^2t - 6ploga(5p) + 2')
+                >>> y.split('x')
+                which yield ( - cot(t)sec2(t) + 2, 3xcos2(2t) + x^2t - 6plog2x(5p))
+
+                To match more than one parameter, use list or tuple instead
+                for example to match terms with x and terms with t
+                >>> y.split(('x', 't'))
+                which yield ( - 6ploga(5p) + 2, 3xcos2(2t) + x^2t - cot(t)sec2(t))
+
+                To match terms with more than one parameter simultaneously, use set
+                for example to match terms has both  x and t
+                >>> y.split({'x', 't'})
+                which yield ( - cot(t)sec2(t) - 6ploga(5p) + 2, 3xcos2(2t) + x^2t)
+
+                suming the tuple will give back the ExprObj
+                i.e sum( - cot(t)sec2(t) - 6ploga(5p) + 2, 3xcos2(2t) + x^2t)
+
+
+
+            def _tables(self, values, fig = False,  var = None, **value)
+            This return the tables method in list
+
+            
+
+        Properties of  Expr Objects
+        ========================
+
+            def variables
+            This property gives the all variables in an Expr Objects including constant
+        
+            def vars
+            This property gives the all variables in an Expr Objects excluding constant
+
+
+            def constants
+            This property gives the all constants in an Expr Objects only
+        
+
+            def deg
+            This property returns the degree of an Expression
+        
+
+            def islin(self):
+            This Method returns True if the Expression is of degree 1
+
+
+            def pow_order
+            returns the max index in an ExprObj
+
+            def npow_order
+            returns the max index in an ExprObj
+
+            def islinear
+            returns True if the ExprObj is linear else False
+
+
+            def isnum
+            This method return True if the Expression is an integer or float
+
+
+            def numable
+            This method return True if the Expression can be converted to a number
+
+            def complex
+            returns the complex part of an ExprObj
+
+
+            def real
+            returns the real part of an ExprObj
+
+
+            def iscomplex
+            return True only if complex identities are present
+
+            def cleared
+            Clear all terms in the Expr Object to Zero
+
+
+            def conjugate
+            return the conjugate of an ExprObj,
+            This Property asserts that the ExprObj contains complex identities
+            else an exception is raised
+
+
+            def powof(self,var, suppress = False)
+            returns the max index of a variable, raise an exception if not found except suppress is set to True
+
+
+            def wraps(self, var, detailed = False)
+            returns True an expression or variable is present
+            Similar to the "in" keyword, but here the coefficients are ignored
+            passing the arg detailed as True returns the exact match in a tuple
+
+
+            def solns(self,equate = 0, repeat = False, rejection  = True, fix = '', **kwargs):
+            This return all the solutions in a tuple
+            By default the repeat arg is False, so repeated roots/solutions are ignored,
+            setting repeat to True will return all repeated solutions.
+
+            def pow_order
+            returns the max index in an ExprObj
+
+            def npow_order
+            returns the max index in an ExprObj
+
+            def rindex()
+            Factorise terms with the same index
+
+            def islinear
+            returns True if the ExprObj is linear else False
+
+
+            def isnum
+            This method return True if the Expression is an integer or float
+
+
+            def numable
+            This method return True if the Expression can be converted to a number
+
+            def complex
+            returns the complex part of an ExprObj
+
+
+            def real
+            returns the real part of an ExprObj
+
+
+            def iscomplex
+            return True only if complex identities are present
+
+            def cleared
+            Clear all terms in the Expr Object to Zero
+
+
+            def conjugate
+            return the conjugate of an ExprObj,
+            This Property asserts that the ExprObj contains complex identities
+            else an exception is raised
+
+
+
+        Other Methods for  Expr Objects
+        ===============================
+
+
+            def rindex()
+            Factorise terms with the same index
+
+            def get_power(self, var)
+            return the power of a variable in an ExprObj
+            returns tuple of the powers if the variable is raised to different powers
+            returns a term if the variable is raised once, returns None if the variable is absent
+
+
+            def isfactor(self,factor)
+            return True if factor is a factor of the Expression
+
+
+            def factor(self,factor)
+            return True if divisible by factor
+        
+
+            def isdivisible(self,other)
+            return if no remainder will be returned after division
+
+            def coeff(self,other)
+            return the coefficient of a variable in an Expression
+
+
+            round(ExprObj, n)
+            For approximations to n decimal places
+
+
+            conversions to python data is also possible
+            int(ExprObj), float(ExprObj), list(ExprObj), tuple(ExprObj), str(ExprObj)
+            
+
+            ~ExprObj returns the reciprocal of the ExprObj
+
+            
+            pop(self, other)
+            This method remove a term from the Expression and return it
+            if the argument is an integer let say n, it will remove and
+            return the nth term of the expression else it will wipe and
+            return the item
+            >>> Fx = Expr('3x - 2alpha + omegat - cos(alpha - omegat)')
+            >>> x = Fx.pop('omegat')
+            x is now ωt and has been removed from Fx
+        
+
+            def unify(self, strict = False)
+        
+            If the Expr Objects contains Fractions, this method combine all terms
+            into a single term.
+
+            if strict is True, terms with negative powers will be treated as Fractions as well
+        
+
+            def remove(self,other)
+            To remove an item from an Expression
+            >>> Fx = Expr('3x - 2alpha + omegat - cos(alpha - omegat)')
+            >>> Fx.remove('-2alpha')
+            Note that if the item is not present no exception is raised
+            Also not that you can remove more than one item
+            >>> y = Expr('x + y -pcos(-3p) - log(6x) + ln(2x+1)')
+            >>> y.remove('x - log(6x) + y')
+
+            def wipe(self,other):
+            The wipe an expression from a Expr Objects, the items
+            are verified to be present before removal
+
+            This works like the remove method: however, an exception
+            (InvalidOperation)
+            is raised if one of the items to be removed is not present
+
+
+            def index(self,args)
+            return the index of a term in an ExprObj
+
+
+                Notes on  Expr Objects
+            ===============================
+            
+            Expr Objects has two main properties.
+            The Expression itself and its internal property (attributes)
+            If Expr is an Expr Object, Use:
+                1. deepcopy to copy all properties and attributes; deepcopy(ExprObj)
+                2. copy to shallow copy the Expression only.
+                   Note that there may be discrepancied in shallow copies of nested Expr Objects. e.g hypolic like cosh objects
+                   and this is because they are trig object with special attribute that identify them as
+                   hyperbolic, which may not be copied; copy(ExprObj)
+                3. duplicate to deepcopy only the Expression; ExprObj.duplicate()
+                4. new to return an empty expression with a copy of all the attributes.
+                   Note that all the attributes of the Expressions will be ignored; new(Expr)
+
+
+
+            
+            Expr Object support term deletion
+
+            >>> Fx = Expr('3x - 2alpha + omegat - cos(alpha - omegat)')
+            Now Fx = 3x - 2α + ωt - cos(α - ωt)
+             To delete the 2nd term
+            >>> del Fx[2]
+            To delete the last term
+            >>> del Fx[-1]
+
+
+           
+            To return a term at a given index.
+
+            Note that Expr Objects indices start from 1
+
+            >>> W = Expr('x^3 - 3x^2 - 7xy + 3')
+            W[1] will give the first term which x^3
+            W[3] will give the 3rd term, which is -7xy
+            Negative indices counts from the back
+            W[-1] will return the last term 3
+            W[-3] will return third to the last
+        
+
+
+            
+            Use the "in" to check if an expression is in the Expr Object
+
+            W = Expr('2 + 3w - 3w^-2 + 3w^-4')
+            '3w + 2' in W will return True
+            '-2 + 3w' in W will return False
+
+            For True to be returned, the coefficient and powers must match else False
+            if coefficient doesn't matter in the matching consider using wrap method
+            
+
+            ExprObjs work with if statement
+            Any Expr Object that is not 0 will return True else False
+
+            f(x) = 2x^2 - 8x + 8, g(x) = x - 2;
+            If h(x) = f(x) - 2 * g(x)^2, Prove that h(x) is a Zero
+            
+            >>> fx = Expr('2x^2 - 8x - 8')
+            >>> gx = Expr('x - 2')
+            >>> if fx and gx:
+                    hx = (fx - 2 * gx ** 2).simp()
+                if hx:
+                    print('False, h(x) is not a Zero')
+                else:
+                    print('True, h(x) is a Zero function')
+        
+
+
+            To establish the equivalency of two Expr Objects
+            if A = sin(7θ), B = 7sin(θ) - 56sin3(θ) + 112sin5(θ) - 64sin7(θ)
+
+            To show that A is equivalent to B
+
+            >>> A = Expr('sin(7theta)')
+            >>> B = Expr('7sin(theta)-56sin3(theta)+112sin5(theta) - 64sin7(theta)')
+            >>> A | B
+            This should return True
+
+            If  both Expression are not equivalent it will return False
+
+            Note that the == may return False because for == to return True both the
+            must be identical both in terms and have the same number terms
+
+
+            abs(ExprObj) returns absolute value of a number
+
+            def like(self,other)
+            The like method returns a list containing all the variables in two
+            Expr Objects
+
+            len(ExprObjs) will return the number of terms in the ExprObj
+
+
+            For Loops
+                for loops will iterate over each term of the ExprObj successively and returned
+                them as strings
+                    don't used this when there is are possibilities the the strings will be
+                    converted back to ExprObj else use
+
+                ExprObj.struct
+                    iterate over ExprObj.struct iterates over all the terms successively and returned
+                them as ExprObj
+
+                e.g
+
+                >>> B = Expr('7sin(theta)-56sin3(theta)+112sin5(theta) - 64sin7(theta)')
+                >>> for exprs in B:
+                    print(exprs, 5 * exprs)
+                which displays
+                7sin(θ) 7sin(θ)7sin(θ)7sin(θ)7sin(θ)7sin(θ)
+                 - 56sin3(θ)  - 56sin3(θ) - 56sin3(θ) - 56sin3(θ) - 56sin3(θ) - 56sin3(θ)
+                112sin5(θ) 112sin5(θ)112sin5(θ)112sin5(θ)112sin5(θ)112sin5(θ)
+                 - 64sin7(θ)  - 64sin7(θ) - 64sin7(θ) - 64sin7(θ) - 64sin7(θ) - 64sin7(θ)
+
+                This is because the exprs is a string,
+                consider this
+                >>> for exprs in B.struct:
+                    print(exprs, 5 * exprs)
+
+                which will display
+                7sin(θ) 35sin(θ)
+                 - 56sin3(θ)  - 280sin3(θ)
+                112sin5(θ) 560sin5(θ)
+                 - 64sin7(θ)  - 320sin7(θ)
+                
+
+                    
+
+
+    '''
+
+
+
+
+
+'''Eqn Objs
+
+        This Class is for creating and managing groups of Expressions or functions, or equation
+        the equal sign can be included esle it will be included for you.
+
+        eqns = Eqns('x + 4y = -7', 'x^2 + y^2 = 17', '4x - 7y - 14')
+        
+
+    EqnObjs.add(*eqns_)
+        to add more equations and functions
+
+    EqnObjs.vars returns all the variables in all the Expressions
+
+    EqnObjs.visualize(color = '',linewidth = 2, *args, **kwarg)
+         returns the Visual class if supported by the EqnObjs
+         
+    EqnObjs.solve(matrix = '', vmat = '', other = '',option = 'all', generator = False, **kwargs)
+        returns the solutions in pairs of variable and values as a dictionary
+        incase the system of equation has been arranged in a Matrix Object, set the matrix argument,
+        with vmat being the list of the variables in order.
+        i.e EsQ.solve(matrix = MatObj, vmat = [x1,x2,x3,....])
+
+        by default, solve method will solve the eqns in the EqnObj simultaneously incase the
+        equations of the EqnObjs are independent i.e are not systems of simultaneous eqns
+        such EqnObj may not be solved simultaneosly, but separately. Use the option argument to set
+        whether to solve for specific equations or all
+        
+        EqnObjs.solve(option = 2, 4,5) will solve and return the solutions for eqns 2,4,5
+        EqnObjs.solve(option = 'all') will solve all equations independently or separately
+
+        solutions can be returned as a generator
+        EqnObjs.solve(generator = True)
+
+        to substitute values before solving, these parameters can be passed as keyword args
+        e.g  EqnObjs.solve(a = 2, b = -4, c = 2x,.....)
+        
+
+    EqnObjs.verify(values = '', **kwargs)
+        verify if the values are valid for all eqns in the EqnObj else raises an Exception
+        
+    EqnObjs.cross() will convert all eqns in the Obj to ExprObjs
+    EqnObjs.islinear returns True EqnObj is a system of linear Expression else False
+
+    EqnObj[x] = new_eqn will change the eqn at index x to new_eqn
+        
+    copy(EqnObjs) returns the copy of the Obj
+
+    len(EqnObjs) returns the numbers of eqns in the Obj
+
+
+    del EqnObjs[i] will delete eqn(i) from the EqnObjs
+    EqnObjs.pop(index) del the eqn at the index and return it
+
+
+    EqnObjs[x] will return the eqn at index x
+
+    EqnObj[x] = new_eqn will change the eqn at index x to new_eqn
+
+    for loops will iterate over all the eqns in the EqnObjs successively
+    
+

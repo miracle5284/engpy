@@ -1,0 +1,182 @@
+'''Vector Objects (VectObjs) can be created by calling the Vector Class
+           if R = xî + yĵ + zǩ
+           To represent R as VectObj, then
+           This can be either
+               1. parsing the coefficients the i, j, k planes respectively:
+                   >>> R = Vector(['x','y','z']
+                   xî + yĵ + zǩ
+    
+                2. Taking the vector of an ExprObj
+                    >>> from engpy.tools.exprs import Expr
+                    >>> from engpy.arrays import Vector
+                    >>> r = Expr('x.i + y.j +z.k')
+                    >>> R = Vector(r)
+                3. parsing as a string
+                    >>> R = Vector('xi + yj +zk')
+
+
+    VectObj.vars  returns all the variables in the VectObj
+
+    VectObj.i returns the i component of the VectObj
+
+    VectObj.j  returns the j component of the VectObj
+
+
+    VectObj.k  returns the k component of the VectObj
+
+
+    abs(VectObj) returns the modulus of the VectObj
+        
+    
+    VectObj.ray() returns the VectObj component in a list
+
+    VectObj.theta_x  returns the directional cosine in x direction
+
+
+    VectObj.theta_y  returns the directional cosine in y direction
+
+
+    VectObj.theta_z  returns the directional cosine in z direction
+    
+
+    VectObj.theta(other)  returns the angle between tow VectObjs
+
+
+    VectObj.lin_diff(var = 't')
+        Differentiate a VectObj wrt to var
+        by default, var = 't'
+
+    VectObj.integrate(var = 't')
+        Integrate a VectObj wrt to var
+           by default, var = 't'
+        
+
+    VectObj.isscalar  returns True if the VectObj is a scalar
+
+
+    VectObj.unit()  returns the VectObj in unit form/notation
+
+    
+    VectObj.tangent(**var)
+        returns the tangent of the VectObj
+
+           Determine the tangent vector at point (2,4,7) for the curve with
+           parametric equation
+                           x = 2u; y = u^2 + 3; z = 2u^2 + 5
+           >>> x, y , z = Var('2u', 'u^2 + 3', '2u^2 + 5')
+           >>> r = Vector((x,y,z))
+           >>> r.tangent(u = 1)
+           2î + 2ĵ + 4ǩ
+
+
+           Determine the unit tangent vector at point (2,0,π) for the curve with
+           parametric equation
+                           x = 3t, y = 2t^2, z = 2t^2 + 2
+           >>> x, y , z = Var('3t', '2t^2', '2t^2 + 2')
+           >>> r = Vector((x,y,z))
+           >>> r.tangent(t = 2).unit()
+           59299/231359î + 306942/449083ĵ + 306942/449083ǩ
+
+
+           A particle moves in space so that at time t its position is stated as
+           x = 2t + 3, y = t^2 + 3t, z = t^3 + 2t^2. Find the component of velocity
+           
+    VectObj.simp(**values):
+        Evaluating and substituting values into the VectObj
+           e.g VectObj.simp(x =4)
+
+    VectObj.grad(scalar,*func, **pts):
+        returns the grad of a scalar
+           the scalar can be a string or ExprObj, by default func is
+           x : i, y:j , z: k pair
+           
+           if φ = 3x^2y - y^3z^2; find gard φ at the point (1,-2,-1)
+
+           >>> vec.grad('3x^2y - y^3z^2', x = 1, y = -2, z = -1)
+           - 12î - 9ĵ - 16ǩ
+           
+    VectObj.direc(scalar,*func, **pts)
+        Similar to grad, however, must be carried out on the vector with the direction
+
+
+           Find the directonal derivative of x^2y^2z^2 at the point (1,1,-1) in the direction
+           of the tangent of the curve x = e^t, y = sin(2t) + 1, z = 1 - cos(t) at t = 0
+
+           >>> phi = Var('x^2y^2z^2')
+           >>> curve = Vector(('.e^t', 'sin(2t)+1','1-cos(t)'))
+           >>> tan_curve = curve.tangent(t = 0)
+           >>> tan_curve.direc(phi, x = 1, y = 1, z = -1)
+           832040/310083
+        
+    VectObj.normal(scalar,*func, **pts)
+
+            Find the rate of change of φ = xyz in the direction normal to the surface
+                                x^2y + y^2x + yz^2 = 3 at the point (1,1,1)
+            >>> normal = vec.normal('x^2y + y^2x + yz^2 - 3', x = 1, y =1, z =1)
+            >>> normal.grad('xyz', x = 1, y = 1, z = 1)
+            1587401/949824
+
+
+            Find the constants m and n such that the surface mx^2 - 2nyz = (m + 4)x will
+            be orthogonal to the surface 4x^2y + z^3 = 4 at the point (1, -1, 2)
+
+            >>> phi_1 = Var('mx^2 - 2nyz - (m + 4)x')
+            >>> points = {'x': 1, 'y': -1, 'z': 2}
+            >>> n = phi_1.solved(**points)
+            >>> phi_2 = Var('4x^2y + z^3 - 4')
+            >>> normal_phi_1 = vec.normal(phi_1,n = n, **points)
+            >>> normal_phi_2 = vec.normal(phi_2,**points)
+            >>> m = (normal_phi_1 & normal_phi_2).solved()  # both normals are said to be orthogonal
+            >>> m,n
+            (5, 1)
+            
+            
+    VectObj.issolenoidal  return True if solenoidal else False
+
+    VectObj.isrotational  return False if irrotational else True
+
+
+    VectObj.isorth(VectObj2)  return True if vectObj and the other VecObj are orthogonal else False
+
+
+    VectObj.div(planes = ('x','y','z'), **pts)
+            returns the divergence of a VectObj on planes
+            By default the planes are x, y, z
+
+            if u =  x^2 + y^2 + z^2, and r = xî + yĵ + zǩ, then find div(ur)
+
+            >>> u = Var('x^2 + y^2 + z^2')
+            >>> r = Vector('xî + yĵ + zǩ')
+            >>> (u * r).div()
+            5x^2 + 5y^2 + 5z^2
+    
+     VectObj.curl(planes = ('x','y','z'), **pts)  returns the curl of a VectObj on planes
+
+           Find the divergence and curl of v = (xyz)î + (3x^2y)ĵ + (xz^2 - y^2z)ǩ
+                   at  (2, -1, 1)
+
+           >>> v = Vector('(xyz)i + (3x^2y)j + (xz^2 - y^2z)k')
+           >>> div_v = v.div(x = 2, y = -1, z = 1)
+           >>> curl_v = v.curl(x = 2, y = -1, z = 1)
+           >>> div_v, curl_v
+           (14, 2î - 3ĵ - 14ǩ)
+        
+    VectObj ^ VectObj2  returns the angle between two VectObj in cosines
+
+    VectObj.empty  return Null VectObj
+    
+    VectObj & VectObj2 returns the dot product of two VectObj
+
+    VectObj.s_trip(VectObj2, VectObj3) returns the scalar product of 3 VectObjs
+
+    VectObj.v_trip(VectObj2, VectObj3) returns the vector product of 3 VectObjs
+
+    VectObj1 | VectObj2 returns True if both vectors are equivalent else False
+    
+    bool(VectObj) returns True if None of the complex planes is Zero else False
+    
+    VectObj1 == VectObj2 compares if the coefficient of the planes are equal 
+    
+    VectObj.coplanar(VectObj2, VectObj3) returns True  if the 3 VectObjs re coplanar else False'''
+
+
