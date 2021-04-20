@@ -1,4 +1,5 @@
-'''Engpy is a free and open-source Python library for Engineering computing
+'''Engpy, Python for Engineers; Python for Engineering.
+   This is a free and open-source Python library for Engineering computing
 
     Engpy is targeted to take care of most engineering problems like caculus,
     transforms, graphs, complex algebraic expressions, Matrices manipulation,
