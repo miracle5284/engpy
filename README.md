@@ -6,7 +6,17 @@ Python for Engineering
     Engpy is targeted to take care of most engineering problems like caculus,
     transforms, graphs, complex algebraic expressions, Matrices manipulation,
     vector analysis, analyzing signals.
+    
+    This package can be installed through pip with the command
+    "
+   
+        pip install engpy
+        
+    "
 
+     Full access to the library is available at https://github.com/miracle5284/engpy/releases/tag/v1.0.0
+     
+     
     The Engpy consist of mainly 3 Datatypes:
     1. Expr
         This is the core datatype of Engpy. Most other engpy are based on this class
