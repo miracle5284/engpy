@@ -36,7 +36,7 @@ Python for Engineering
         For example, y  = 2xcos3(2θ) - 7y^2sin(2ω) - ln(sqrt(z +3)); s = y - cos(5z)
         This can be enter directly into the Expr Class
         >>> from engpy import Expr
-        >>> w = Expr('2xcos3(2theta) - 7y^2sin(2omega) - ln(sqrt(z +3)); s = y - cos(5z)')
+        >>> w = Expr('2xcos3(2theta) - 7y^2sin(2omega) - ln(sqrt(z +3))
         >>> s = w - 'cos(5z)'
         >>> w
         2xcos3(2θ) - 7y^2sin(2ω) - ln(sqrt(z + 3))
